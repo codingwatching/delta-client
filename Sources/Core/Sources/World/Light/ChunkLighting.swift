@@ -49,13 +49,13 @@ public struct ChunkLighting {
     isPopulated = true
   }
   
-  public func getLightLevel(at position: Position) -> LightLevel {
+  public func getLightLevel(at position: BlockPosition) -> LightLevel {
     let skyLightLevel = getSkyLightLevel(at: position)
     let blockLightLevel = getBlockLightLevel(at: position)
     return LightLevel(sky: skyLightLevel, block: blockLightLevel)
   }
   
-  public func getLightLevel(at position: Position, inSectionAt sectionIndex: Int) -> LightLevel {
+  public func getLightLevel(at position: BlockPosition, inSectionAt sectionIndex: Int) -> LightLevel {
     var position = position
     position.y += sectionIndex * Chunk.Section.height
     let skyLightLevel = getSkyLightLevel(at: position)
@@ -76,7 +76,7 @@ public struct ChunkLighting {
   }
   
   /// Returns the sky light level at the specified position.
-  public func getSkyLightLevel(at position: Position) -> Int {
+  public func getSkyLightLevel(at position: BlockPosition) -> Int {
     if !Self.isValidPosition(position) {
       return LightLevel.defaultSkyLightLevel
     }
@@ -104,7 +104,7 @@ public struct ChunkLighting {
   }
   
   /// Returns the block light level at the specified position.
-  public func getBlockLightLevel(at position: Position) -> Int {
+  public func getBlockLightLevel(at position: BlockPosition) -> Int {
     if !Self.isValidPosition(position) {
       return LightLevel.defaultBlockLightLevel
     }
@@ -133,7 +133,7 @@ public struct ChunkLighting {
   
   // TODO: properly initialise sky light sections when creating new ones
   
-  public mutating func setBlockLightLevel(at position: Position, to newLevel: Int) {
+  public mutating func setBlockLightLevel(at position: BlockPosition, to newLevel: Int) {
     guard Self.isValidPosition(position) else {
       return
     }
@@ -151,7 +151,7 @@ public struct ChunkLighting {
     }
   }
   
-  public mutating func setSkyLightLevel(at position: Position, to newLevel: Int) {
+  public mutating func setSkyLightLevel(at position: BlockPosition, to newLevel: Int) {
     guard Self.isValidPosition(position) else {
       return
     }
@@ -169,7 +169,7 @@ public struct ChunkLighting {
     }
   }
   
-  public static func isValidPosition(_ position: Position) -> Bool {
+  public static func isValidPosition(_ position: BlockPosition) -> Bool {
     return position.x >= 0 && position.y >= 0 && position.z >= 0 && position.x < Chunk.width && position.y < Chunk.height && position.z < Chunk.depth
   }
 }

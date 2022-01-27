@@ -11,29 +11,29 @@ import Collections
 public struct LightingEngine {
   /// Queue of blocks to check for increasing light levels. Contains position of block, light level of block,
   /// extra instructions to perform before the usual increase check, and directions to skip checking in.
-  private var increaseQueue: Deque<(Position, Int, IncreaseFlags, [Direction])> = []
+  private var increaseQueue: Deque<(BlockPosition, Int, IncreaseFlags, [Direction])> = []
   /// Queue of blocks to check for decreasing light levels. Contains position of block, light level of block,
   /// and directions to skip checking in.
-  private var decreaseQueue: Deque<(Position, Int, [Direction])> = []
+  private var decreaseQueue: Deque<(BlockPosition, Int, [Direction])> = []
   
   /// Create a new lighting engine instance with its own queues.
   public init() { }
   
   /// Propagates lighting changes from an updated block. `position` is in world coordinates.
-  public mutating func updateLighting(at position: Position, in world: World) {
+  public mutating func updateLighting(at position: BlockPosition, in world: World) {
     increaseQueue = []
     decreaseQueue = []
     updateLighting(at: [position], in: world)
   }
   
   /// Propagates lighting changes from multiple updated blocks. `positions` are in world coordinates.
-  public mutating func updateLighting(at positions: [Position], in world: World) {
+  public mutating func updateLighting(at positions: [BlockPosition], in world: World) {
     updateBlockLight(at: positions, in: world)
     updateSkyLight(at: positions, in: world)
   }
   
   /// Propagates block light changes from multiple updated blocks. `positions` are in world coordinates.
-  private mutating func updateBlockLight(at positions: [Position], in world: World) {
+  private mutating func updateBlockLight(at positions: [BlockPosition], in world: World) {
     for position in positions {
       queueBlockLightUpdate(at: position, in: world)
     }
@@ -47,7 +47,7 @@ public struct LightingEngine {
   /// Propagates sky light changes from multiple updated blocks. `positions` are in world coordinates.
   ///
   /// All positions provided must be in existent chunks.
-  private mutating func updateSkyLight(at positions: [Position], in world: World) {
+  private mutating func updateSkyLight(at positions: [BlockPosition], in world: World) {
     for position in positions {
       let chunkRelativePosition = position.relativeToChunk
       guard let highest = world.chunk(at: position.chunk)?.highestLightBlockingBlock(atX: chunkRelativePosition.x, andZ: chunkRelativePosition.z) else {
@@ -90,7 +90,7 @@ public struct LightingEngine {
   }
   
   /// Checks an updated block and queues any block light level propagation required.
-  private mutating func queueBlockLightUpdate(at position: Position, in world: World) {
+  private mutating func queueBlockLightUpdate(at position: BlockPosition, in world: World) {
     let currentLightLevel = world.getBlockLightLevel(at: position)
     let block = world.getBlock(at: position)
     let emittedLight = block.lightMaterial.luminance
@@ -105,7 +105,7 @@ public struct LightingEngine {
   }
   
   /// Checks an updated block and queues any sky light level propagation required.
-  private mutating func queueSkyLightUpdate(at position: Position, in world: World) {
+  private mutating func queueSkyLightUpdate(at position: BlockPosition, in world: World) {
     let currentLightLevel = world.getSkyLightLevel(at: position)
     
     if currentLightLevel == 15 {
@@ -119,8 +119,8 @@ public struct LightingEngine {
   
   private mutating func performLightLevelIncrease(
     in world: World,
-    getLightLevel: (_ position: Position) -> Int,
-    setLightLevel: (_ position: Position, _ level: Int) -> Void
+    getLightLevel: (_ position: BlockPosition) -> Int,
+    setLightLevel: (_ position: BlockPosition, _ level: Int) -> Void
   ) {
     while let (position, light, flags, skipDirections) = increaseQueue.popFirst() {
       if flags.contains(.writeLevel) {
@@ -163,8 +163,8 @@ public struct LightingEngine {
   
   private mutating func performLightLevelDecrease(
     in world: World,
-    getLightLevel: (_ position: Position) -> Int,
-    setLightLevel: (_ position: Position, _ level: Int) -> Void
+    getLightLevel: (_ position: BlockPosition) -> Int,
+    setLightLevel: (_ position: BlockPosition, _ level: Int) -> Void
   ) {
     while let (position, propagatedLight, skipDirections) = decreaseQueue.popFirst() {
       for direction in Direction.allDirections where !skipDirections.contains(direction) {

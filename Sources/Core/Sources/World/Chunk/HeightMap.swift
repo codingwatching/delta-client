@@ -22,7 +22,7 @@ public struct HeightMap {
     return heightMap[columnIndex(x, z)]
   }
   
-  public func getHighest(_ position: Position) -> Int {
+  public func getHighest(_ position: BlockPosition) -> Int {
     return heightMap[columnIndex(position)]
   }
   
@@ -30,14 +30,14 @@ public struct HeightMap {
     return skyLightBlockingHeightMap[columnIndex(x, z)]
   }
   
-  public func getHighestLightBlocking(_ position: Position) -> Int {
+  public func getHighestLightBlocking(_ position: BlockPosition) -> Int {
     return skyLightBlockingHeightMap[columnIndex(position)]
   }
   
   /// Updates the height maps with regards to the given block update.
   ///
   /// The block should already be updated in the chunk.
-  public mutating func handleBlockUpdate(at position: Position, in chunk: Chunk, acquireChunkLock: Bool = true) {
+  public mutating func handleBlockUpdate(at position: BlockPosition, in chunk: Chunk, acquireChunkLock: Bool = true) {
     let newBlock = chunk.getBlock(at: position, acquireLock: acquireChunkLock)
     let columnIndex = self.columnIndex(position)
     let highestBlock = heightMap[columnIndex]
@@ -94,7 +94,7 @@ public struct HeightMap {
     }
   }
   
-  private func columnIndex(_ position: Position) -> Int {
+  private func columnIndex(_ position: BlockPosition) -> Int {
     return columnIndex(position.x, position.z)
   }
   
