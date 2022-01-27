@@ -52,7 +52,7 @@ public final class Client {
     connection?.close()
     connection = nil
     // Reset chunk storage
-    game.world = World(eventBus: eventBus)
+    game.setWorld(World(eventBus: eventBus))
     // Stop ticking
     game.tickScheduler.cancel()
   }
