@@ -19,13 +19,11 @@ public final class Client {
   
   // MARK: Init
   
+  /// Creates a new client instance.
+  /// - Parameter resourcePack: The resources to use.
   public init(resourcePack: ResourcePack) {
     self.resourcePack = resourcePack
     game = Game(eventBus: eventBus)
-    eventBus.registerHandler { [weak self] event in
-      guard let self = self else { return }
-      self.handleEvent(event)
-    }
   }
   
   deinit {
@@ -52,7 +50,7 @@ public final class Client {
     connection?.close()
     connection = nil
     // Reset chunk storage
-    game.setWorld(World(eventBus: eventBus))
+    game.changeWorld(to: World(eventBus: eventBus))
     // Stop ticking
     game.tickScheduler.cancel()
   }
@@ -75,20 +73,27 @@ public final class Client {
     }
   }
   
-  // MARK: Event
+  // MARK: Input
   
-  private func handleEvent(_ event: Event) {
-    switch event {
-      case let inputEvent as InputEvent:
-        game.accessPlayer { player in
-          player.updateInput(with: inputEvent)
-        }
-      case let mouseEvent as MouseMoveEvent:
-        game.accessPlayer { player in
-          player.updateLook(with: mouseEvent)
-        }
-      default:
-        break
-    }
+  /// Handles a key press.
+  /// - Parameter input: The key to press.
+  public func press(_ input: Input) {
+    game.press(input)
+    eventBus.dispatch(InputEvent.press(input))
+  }
+  
+  /// Handles a key release.
+  /// - Parameter input: The key to release.
+  public func release(_ input: Input) {
+    game.release(input)
+    eventBus.dispatch(InputEvent.release(input))
+  }
+  
+  /// Moves the mouse.
+  /// - Parameters:
+  ///   - deltaX: The change in mouse x.
+  ///   - deltaY: The change in mouse y.
+  public func moveMouse(_ deltaX: Float, _ deltaY: Float) {
+    game.moveMouse(deltaX, deltaY)
   }
 }
