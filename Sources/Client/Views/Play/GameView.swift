@@ -286,9 +286,21 @@ struct GameView: View {
         let averageGPUTime = (averageGPUTime * 1000.0).rounded(toPlaces: 1)
         Text("GPU time: \(String(format: "%.01f", averageGPUTime))ms")
       }
+      
+      Spacer().frame(height: 16)
+      
+      Text("Gamemode: \(gamemode.string)")
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .padding(16)
+  }
+  
+  var gamemode: Gamemode {
+    var gamemode = Gamemode.survival
+    model.client.game.accessPlayer { player in
+      gamemode = player.gamemode.gamemode
+    }
+    return gamemode
   }
   
   var renderStats: RenderStatistics {
